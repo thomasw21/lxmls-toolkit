@@ -42,7 +42,17 @@ class MultinomialNaiveBayes(lc.LinearClassifier):
         # ----------
         # Solution to Exercise 1
 
-        raise NotImplementedError("Complete Exercise 1")
+        # TODO: check how to not do this using a for loop
+        for class_ in classes:
+            prior[class_] = np.equal(class_, y).sum() / len(y)
+
+        for class_ in classes:
+            if self.smooth:
+                likelihood[:, class_] = 1 + np.where(np.equal(class_, y), x, 0).sum(axis=0)
+                likelihood[:, class_] /= n_words + likelihood[:, class_].sum()
+            else:
+                likelihood[:, class_] = np.where(np.equal(class_, y), x, 0).sum(axis=0)
+                likelihood[:, class_] /= likelihood[:, class_].sum()
 
         # End solution to Exercise 1
         # ----------
