@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 from lxmls.deep_learning.mlp import MLP
+import torch.nn.functional as F
 
 
 def cast_float(variable):
@@ -45,8 +46,11 @@ class PytorchMLP(MLP):
 
         # ----------
         # Solution to Exercise 4
+        for weight, bias in self.parameters[:-1]:
+            tilde_z = torch.sigmoid(torch.matmul(tilde_z, weight.transpose(0,1)) + bias)
 
-        raise NotImplementedError("Implement Exercise 4")
+        weight, bias= self.parameters[-1]
+        log_tilde_z = F.log_softmax(torch.matmul(tilde_z, weight.transpose(0,1)) + bias, dim=-1)
 
         # End of solution to Exercise 4
         # ----------

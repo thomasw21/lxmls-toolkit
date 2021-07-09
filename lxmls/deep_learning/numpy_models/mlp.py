@@ -1,4 +1,5 @@
 import numpy as np
+
 from lxmls.deep_learning.mlp import MLP
 from lxmls.deep_learning.utils import index2onehot, logsumexp
 
@@ -85,18 +86,32 @@ class NumpyMLP(MLP):
         log_prob_y, layer_inputs = self.log_forward(input)
         prob_y = np.exp(log_prob_y)
 
-        num_examples, num_clases = prob_y.shape
+        num_examples, num_classes = prob_y.shape
         num_hidden_layers = len(self.parameters) - 1
 
         # For each layer in reverse store the backpropagated error, then compute
         # the gradients from the errors and the layer inputs
-        errors = []
+        errors = [] # we compute the list backward
 
         # ----------
         # Solution to Exercise 2
 
-        raise NotImplementedError("Implement Exercise 2")
-        
+        I = index2onehot(output, num_classes)
+        errors.append(I - prob_y)
+        for i in range(num_hidden_layers):
+            n = num_hidden_layers - i
+            weight, bias = self.parameters[n]
+            error_temp = np.dot(errors[-1], weight)
+            errors.append(np.einsum("bc,bc,bc->bc", error_temp, layer_inputs[n], 1 - layer_inputs[n]))
+
+        # We need to reverse the list fo that errors are ordered in the good order.
+        errors.reverse()
+
+        grad_ws = [- np.einsum("bo,bi->oi", error, layer_input)/num_examples for error, layer_input in zip(errors, layer_inputs)]
+        grad_bs = [- error.sum(axis=0)/num_examples for error in errors]
+
+        gradients = [[grad_w, grad_b] for grad_w, grad_b in zip(grad_ws, grad_bs)]
+
         # End of solution to Exercise 2
         # ----------
 
