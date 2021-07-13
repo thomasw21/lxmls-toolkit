@@ -3,12 +3,12 @@ import numpy as np
 import scipy
 import scipy.linalg
 import torch
+import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.distributions import Categorical
 from lxmls.deep_learning.rnn import RNN
 # To sample from model
 from itertools import chain
-
 
 def cast_float(variable, grad=True):
     return Variable(torch.from_numpy(variable).float(), requires_grad=grad)
@@ -92,8 +92,20 @@ class PytorchRNN(RNN):
         # ----------
         # Solution to Exercise 2
 
-        raise NotImplementedError("Implement Exercise 2")
+        K, J = W_y.shape
+        I, E = W_e.shape
 
+        z_e = self.embedding_layer(input)
+
+        z_j_temp = torch.einsum("je,ne->nj", W_x, z_e)
+        h = [torch.zeros(J)]
+        for m in range(nr_steps):
+            z_j = z_j_temp[m] + torch.einsum("ji, j -> i", W_h, h[-1])
+            h.append(torch.sigmoid(z_j))
+
+        z_y = torch.einsum("kj,nj -> nk", W_y, torch.stack(h[1:], dim=0))
+        log_p_y = self.logsoftmax(z_y)
+        
         # End of solution to Exercise 2
         # ----------
 
@@ -243,7 +255,7 @@ class FastPytorchRNN(RNN):
         gradient_parameters = []
         for index in range(0, num_parameters):
             gradient_parameters.append(self.parameters[index].grad.data)
-    
+
         return gradient_parameters
 
 

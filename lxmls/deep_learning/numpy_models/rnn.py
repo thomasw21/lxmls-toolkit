@@ -74,6 +74,9 @@ class NumpyRNN(RNN):
         W_e, W_x, W_h, W_y = self.parameters
         nr_steps = input.shape[0]
 
+        K, J = W_y.shape
+        I, E = W_e.shape
+
         log_p_y, y, h, z_e, x = self.log_forward(input)
         p_y = np.exp(log_p_y)
 
@@ -86,7 +89,28 @@ class NumpyRNN(RNN):
         # ----------
         # Solution to Exercise 1
 
-        raise NotImplementedError("Implement Exercise 1")
+        # print(output.shape)
+        one_hot_y = np.zeros((nr_steps, K))
+        one_hot_y[np.arange(nr_steps), output] = 1
+        e_y = np.einsum("kj, mk -> mj", W_y, one_hot_y - p_y)
+        e_r = np.zeros(J)
+        e_h = np.zeros((nr_steps, J))
+        e_e = np.zeros((nr_steps, E))
+        for m in range(nr_steps -1, -1, -1):
+            e_h[m] = np.einsum("j,j,j-> j",(e_r + e_y[m]), h[m+1], (1-h[m+1]))
+            e_r = np.einsum("ij,i->j", W_h, e_h[m])
+            e_e[m] = np.einsum("ij,i->j", W_x, e_h[m])
+
+        # gradient_W_e =
+        gradient_W_h = - np.einsum("ni, nj->ij", e_h, h[:-1]) / nr_steps
+        gradient_W_x = - np.einsum("nj, ne->je", e_h, z_e) / nr_steps
+
+        gradient_W_e[x] = - e_e / nr_steps
+        gradient_W_y = - np.einsum("nk, nj -> kj", one_hot_y - p_y, h[1:]) / nr_steps
+
+
+
+        # raise NotImplementedError("Implement Exercise 1")
 
         # End of Solution to Exercise 1
         # ----------

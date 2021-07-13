@@ -44,7 +44,37 @@ class StructuredPerceptron(dsc.DiscriminativeSequenceClassifier):
         # ----------
         # Solution to Exercise 3
 
-        raise NotImplementedError("Complete Exercise 3")
+        predicted_sequence, score = self.viterbi_decode(sequence)
+
+        # update initial features
+        true_initial_features = self.feature_mapper.get_initial_features(sequence, sequence.y[0])
+        predicted_initial_features = self.feature_mapper.get_initial_features(sequence, predicted_sequence.y[0])
+        self.parameters[true_initial_features] += self.learning_rate
+        self.parameters[predicted_initial_features] -= self.learning_rate
+
+        # update transmission features
+        for pos in range(len(sequence) -1):
+            true_transition_features = self.feature_mapper.get_transition_features(sequence, pos + 1, sequence.y[pos+1], sequence.y[pos])
+            predicted_transition_features = self.feature_mapper.get_transition_features(sequence, pos + 1, predicted_sequence.y[pos+1], predicted_sequence.y[pos])
+            self.parameters[true_transition_features] += self.learning_rate
+            self.parameters[predicted_transition_features] -= self.learning_rate
+
+        # update emission features
+        for pos in range(len(sequence)):
+            true_emission_features = self.feature_mapper.get_emission_features(sequence, pos, sequence.y[pos])
+            predicted_emission_features = self.feature_mapper.get_emission_features(sequence, pos, predicted_sequence.y[pos])
+            self.parameters[true_emission_features] += self.learning_rate
+            self.parameters[predicted_emission_features] -= self.learning_rate
+
+        # update initial features
+        true_final_features = self.feature_mapper.get_final_features(sequence, sequence.y[-1])
+        predicted_final_features = self.feature_mapper.get_final_features(sequence, predicted_sequence.y[-1])
+        self.parameters[true_final_features] += self.learning_rate
+        self.parameters[predicted_final_features] -= self.learning_rate
+
+        number_of_labels = len(sequence.y)
+        num_mistakes = (predicted_sequence.y != sequence.y).sum()
+        return number_of_labels, num_mistakes
 
         # End of Solution to Exercise 3
         # ----------

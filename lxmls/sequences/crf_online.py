@@ -89,7 +89,7 @@ class CRFOnline(dsc.DiscriminativeSequenceClassifier):
             if pos > 0:
                 # Update transition features.
                 prev_y_t_true = sequence.y[pos-1]
-                true_transition_features = self.feature_mapper.get_transition_features(
+                    true_transition_features = self.feature_mapper.get_transition_features(
                     sequence, pos-1, y_t_true, prev_y_t_true)
                 self.parameters[true_transition_features] += eta
                 for state in range(num_states):

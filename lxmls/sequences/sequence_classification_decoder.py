@@ -79,7 +79,7 @@ class SequenceClassificationDecoder:
     # Initial scores: (num_states) array
     # Transition scores: (length-1, num_states, num_states) array
     # Final scores: (num_states) array
-    # Emission scoress: (length, num_states) array
+    # Emission scores: (length, num_states) array
     # ----------
     def run_viterbi(self, initial_scores, transition_scores, final_scores, emission_scores):
 
@@ -101,7 +101,24 @@ class SequenceClassificationDecoder:
         # ----------
         # Solution to Exercise 8
 
-        raise NotImplementedError("Complete Exercise 8")
+        # Forward pass
+        viterbi_scores[0] = initial_scores + emission_scores[0]
+        for i in range(1,length):
+            temp = transition_scores[i-1] + viterbi_scores[i-1][None,:]
+            viterbi_scores[i] = np.max(temp, axis=-1) + emission_scores[i]
+            viterbi_paths[i] = np.argmax(temp, axis=-1)
+
+        temp = final_scores + viterbi_scores[length-1]
+        last_score = np.max(temp)
+
+        # Backward pass
+        best_path[length-1] = np.argmax(temp)
+        for i in range(length-2,-1,-1):
+            best_path[i] = viterbi_paths[i+1,best_path[i+1]]
+
+        return best_path, last_score
+
+        # raise NotImplementedError("Complete Exercise 8")
 
         #### Little guide of the implementation ####################################
         # Initializatize the viterbi scores

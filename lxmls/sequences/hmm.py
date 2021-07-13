@@ -143,7 +143,12 @@ class HMM(sc.SequenceClassifier):
         # ----------
         # Solution to Exercise 10
 
-        raise NotImplementedError("Complete Exercise 10")
+        self.initial_counts = state_posteriors[0]
+        print(np.sum(transition_posteriors, axis=0).shape)
+        self.transition_counts = np.sum(transition_posteriors, axis=0)
+        self.final_counts = state_posteriors[-1]
+        for i,elt in enumerate(sequence.x):
+            self.emission_counts[elt] += state_posteriors[i]
 
         # End of solution to Exercise 10
         # ----------
@@ -156,10 +161,10 @@ class HMM(sc.SequenceClassifier):
         self.initial_probs = self.initial_counts / np.sum(self.initial_counts)
 
         # Normalize transition counts
-        self.transition_probs = self.transition_counts / (np.sum(self.transition_counts, 0)+self.final_counts)
+        self.transition_probs = self.transition_counts / (np.sum(self.transition_counts, 0) + self.final_counts)
 
         # Normalize final counts
-        self.final_probs = self.final_counts / (np.sum(self.transition_counts, 0)+self.final_counts)
+        self.final_probs = self.final_counts / (np.sum(self.transition_counts, 0) + self.final_counts)
 
         # Normalize emission counts
         self.emission_probs = self.emission_counts / np.sum(self.emission_counts, 0)
