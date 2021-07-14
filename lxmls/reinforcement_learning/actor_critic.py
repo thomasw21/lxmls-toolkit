@@ -29,8 +29,16 @@ class Critic(nn.Module):
         self.linear3 = nn.Linear(12, 1)
 
     def forward(self, state, action):
-        raise Exception("TODO: Implement the forward pass")
 
+        torch_state = torch.from_numpy(state).to(self.linear.weight.device, self.linear.weight.dtype).view(1,-1)
+        torch_action = torch.zeros(1,2, device=self.linear2.weight.device, dtype=self.linear2.weight.dtype)
+        # print(action, torch_action.shape)
+        torch_action[0,action] = 1
+        # torch_action = F.one_hot(action, num_classes=2).to(self.linear2.weight.device, self.linear2.weight.dtype).view(1,-1)
+        x = torch.cat([self.linear(torch_state), self.linear2(torch_action)], dim=1)
+        x = F.sigmoid(x)
+        x = self.linear3(x)
+        return x
 
 def train():
 

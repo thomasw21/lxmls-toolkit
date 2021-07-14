@@ -21,7 +21,11 @@ class PolicyGradient(nn.Module):
         # ----------
         # Solution to Exercise 6.4
 
-        raise Exception("Complete exercise 6.4")
+        x = self.linear(torch.from_numpy(state).to(self.linear.weight.device, self.linear.weight.dtype).view(1,-1))
+        x = F.sigmoid(x)
+        x = self.linear2(x)
+        return F.log_softmax(x)
+        # raise Exception("Complete exercise 6.4")
 
         # End of solution to Exercise 6.4
         # ----------

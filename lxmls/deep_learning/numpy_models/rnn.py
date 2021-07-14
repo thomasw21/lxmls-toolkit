@@ -82,9 +82,9 @@ class NumpyRNN(RNN):
 
         # Initialize gradients with zero entrances
         gradient_W_e = np.zeros(W_e.shape)
-        gradient_W_x = np.zeros(W_x.shape)
-        gradient_W_h = np.zeros(W_h.shape)
-        gradient_W_y = np.zeros(W_y.shape)
+        # gradient_W_x = np.zeros(W_x.shape)
+        # gradient_W_h = np.zeros(W_h.shape)
+        # gradient_W_y = np.zeros(W_y.shape)
 
         # ----------
         # Solution to Exercise 1

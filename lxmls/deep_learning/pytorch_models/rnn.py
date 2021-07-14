@@ -105,7 +105,7 @@ class PytorchRNN(RNN):
 
         z_y = torch.einsum("kj,nj -> nk", W_y, torch.stack(h[1:], dim=0))
         log_p_y = self.logsoftmax(z_y)
-        
+
         # End of solution to Exercise 2
         # ----------
 
@@ -275,15 +275,15 @@ class PolicyRNN(FastPytorchRNN):
         self._gamma = config.get('gamma', 0.9)
         self._maxL = config.get('maxL', None)
 
-    def reinforce_loss(self, log_p_y, loutput):
+    def reinforce_loss(self, log_p_y, out):
         """
         Computes the REINFORCE loss over a batch of sequences
         :param log_p_y: (Batch_size*Len)x dim
         :param out: packed sequence w data (Batch_size*Len) and batch_sizes
         :return: loss as a real value
         """
-        sizes = [len(i) for i in loutput]
-        out = self.pack(loutput)
+        sizes = [len(i) for i in out]
+        out = self.pack(out)
         output = out.data
         pred = torch.max(log_p_y, dim=1)[1]
         # * lengths
@@ -294,9 +294,17 @@ class PolicyRNN(FastPytorchRNN):
             gamma=self._gamma,
             dim=0
         )
+
+        # print(R.shape)
+        # print(pred.shape)
+        # print(float(len(out.batch_sizes)), len(output))
         ### TODO: Compute here the loss using the reinforce update
         ### beginning of exercise 6.5
-        raise Exception("Complete exercise 6.5")
+        loss = - torch.dot(
+            R.squeeze(),
+            log_p_y[torch.arange(len(output)),output]
+        ) / len(output)
+        # raise Exception("Complete exercise 6.5")
         ### end of exercise 6.5
 
         return loss
